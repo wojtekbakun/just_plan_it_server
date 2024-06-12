@@ -32,15 +32,18 @@ const server = http.createServer((req, res) => {
     res.end(`Witaj, ${name}!`);
   }
   // Endpoint obsługujący żądania POST na "/data"
-  else if (pathname === '/data' && req.method === 'POST') {
+  else if (pathname === '/chat' && req.method === 'POST') {
     let body = '';
     req.on('data', chunk => {
       body += chunk.toString();
     });
-    req.on('end', () => {
+    req.on('end', async () => {
       const data = JSON.parse(body);
+      const returnedData = await run(data.prompt);
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(`Otrzymano dane: ${JSON.stringify(data)}`);
+      run(data.prompt);
+      res.end(`Odpowiedź:\n ${returnedData}`);
+  
     });
   }
   // Endpoint nie znaleziony
@@ -54,16 +57,14 @@ server.listen(3000, () => {
   console.log('Server running at http://localhost:3000/');
 });
 
-async function run() {
+async function run(prompt) {
   // The Gemini 1.5 models are versatile and work with both text-only and multimodal prompts
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash"});
-
-  const prompt = "Write me 5 random words"
 
   const result = await model.generateContent(prompt);
   const response = await result.response;
   const text = response.text();
   console.log(text);
+  return text;
 }
 
-run();
