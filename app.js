@@ -1,5 +1,7 @@
 const http = require('http');
 const url = require('url');
+const express = require('express');
+const app = express();
 
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
@@ -10,51 +12,31 @@ console.log(" de: ", process.env.GEMINI_API_KEY);
 // The Gemini 1.5 models are versatile and work with most use cases
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash"});
 
+app.use(express.json());
 
-const server = http.createServer((req, res) => {
-    const parsedUrl = url.parse(req.url, true);
-  const pathname = parsedUrl.pathname;
-  const query = parsedUrl.query;
-  // Endpoint główny
-  if (pathname === '/') {
-    res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end('Witaj na głównej stronie!');
-  }
-  // Customowy endpoint "/hello"
-  else if (pathname === '/hello') {
-    res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end('Witaj świecie!');
-  }
-  // Customowy endpoint z parametrem "/user/:name"
-  else if (pathname.startsWith('/user/')) {
-    const name = pathname.split('/')[2];
-    res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end(`Witaj, ${name}!`);
-  }
-  // Endpoint obsługujący żądania POST na "/data"
-  else if (pathname === '/chat' && req.method === 'POST') {
-    let body = '';
-    req.on('data', chunk => {
-      body += chunk.toString();
-    });
-    req.on('end', async () => {
-      const data = JSON.parse(body);
-      const returnedData = await run(data.prompt);
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      run(data.prompt);
-      res.end(`Odpowiedź:\n ${returnedData}`);
-  
-    });
-  }
-  // Endpoint nie znaleziony
-  else {
-    res.writeHead(404, { 'Content-Type': 'text/plain' });
-    res.end('Strona nie znaleziona');
-  }
+// Middleware do parsowania danych formularza
+app.use(express.urlencoded({ extended: true }));
+
+app.get('/', (req, res) => {
+  res.send('Welcome in Calend.ai!!');
 });
 
-server.listen(3000, () => {
-  console.log('Server running at http://localhost:3000/');
+// app.get('/generate', async (req, res) => {
+//   const data = req.data;
+//   const prompt = req.query.prompt;
+//   const result = await run(prompt);
+//   res.send(result);
+// });
+
+app.post('/generate', async (req, res) => {
+  const data = req.body;
+  const result = await run(data.prompt);
+  res.send(result);
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}/`);
 });
 
 async function run(prompt) {
