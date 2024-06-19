@@ -39,11 +39,38 @@ app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}/`);
 });
 
+
+const generationConfig = {
+  temperature: 1,
+  topP: 0.95,
+  topK: 64,
+  maxOutputTokens: 8192,
+  responseMimeType: "text/plain",
+};
+
 async function run(prompt) {
-  // The Gemini 1.5 models are versatile and work with both text-only and multimodal prompts
+  // The Gemini 1.5 models are versatile and work with multi-turn conversations (like chat)
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash"});
 
-  const result = await model.generateContent(prompt);
+  const chat = model.startChat({
+    history: [
+      {
+        role: "user",
+        parts: [{ text: "Jesteś ekspertem odnośnie zarządzania czasem oraz planowania zadań. Twoją specjalnością jest planowanie długoterminowe. Podam ci rzecz, którą będę chciał się nauczyć lub zadanie, które będę chciał wykonać oraz planowany czas, który chcę na to poświęcić. Podam ci także mój obecny rozkład obowiązków na dany okres, a ty rozpisz mi czynności, które mam wykonać lub tematy, które muszę opanować. Skup się na planowaniu długoterminowym i porozkładaj zadania na różne dni. W opisie dodaj link do podanych przez ciebie tematów. Podaj mi odpowiedź w formacie JSON z polami: tytuł, czas rozpoczęcia (data i godzina), czas zakończenia (data i godzina), opis (opis i link bez pola z opisem). " }],
+      },
+      {
+        role: "model",
+        parts: [{ text: "Let's plan something!" }],
+      },
+    ],
+    generationConfig: {
+      maxOutputTokens: 1000,
+    },
+  });
+
+  const msg = prompt;
+
+  const result = await chat.sendMessage(msg);
   const response = await result.response;
   const text = response.text();
   console.log(text);
