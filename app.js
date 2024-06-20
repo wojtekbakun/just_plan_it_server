@@ -30,7 +30,7 @@ app.get('/', (req, res) => {
 
 app.post('/generate', async (req, res) => {
   const data = req.body;
-  const result = await run(data.prompt);
+  const result = await run(data.whatToPlan, data.whenToPlan, data.currentSchedule);
   res.send(result);
 });
 
@@ -48,15 +48,16 @@ const generationConfig = {
   responseMimeType: "text/plain",
 };
 
-async function run(prompt) {
+async function run(whatToPlan, whenToPlan, currentSchedule) {
   // The Gemini 1.5 models are versatile and work with multi-turn conversations (like chat)
+  const prompt = `Jesteś ekspertem odnośnie zarządzania czasem oraz planowania zadań. Twoją specjalnością jest planowanie długoterminowe. Chcę nauczyć się ${whatToPlan} w ciągu ${whenToPlan}, a mój obecny plan to ${currentSchedule}. Rozpisz mi czynności, które mam wykonać lub tematy, które muszę opanować, aby zrealizować cel. Podziel je na drobne zadania, które będę sukcesywnie wykonywać. Skup się na planowaniu długoterminowym i porozkładaj zadania na różne dni. W opisie dodaj link do podanych przez ciebie tematów. Podaj mi odpowiedź w formacie JSON z polami: tytuł, czas rozpoczęcia (data i godzina), czas zakończenia (data i godzina), opis (opis i link bez pola z opisem). Nie formatuj linków i nie dodawaj dodatkowych znaków, ani paragrafów.`;
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash"});
 
   const chat = model.startChat({
     history: [
       {
         role: "user",
-        parts: [{ text: "Jesteś ekspertem odnośnie zarządzania czasem oraz planowania zadań. Twoją specjalnością jest planowanie długoterminowe. Podam ci rzecz, którą będę chciał się nauczyć lub zadanie, które będę chciał wykonać oraz planowany czas, który chcę na to poświęcić. Podam ci także mój obecny rozkład obowiązków na dany okres, a ty rozpisz mi czynności, które mam wykonać lub tematy, które muszę opanować. Skup się na planowaniu długoterminowym i porozkładaj zadania na różne dni. W opisie dodaj link do podanych przez ciebie tematów. Podaj mi odpowiedź w formacie JSON z polami: tytuł, czas rozpoczęcia (data i godzina), czas zakończenia (data i godzina), opis (opis i link bez pola z opisem). " }],
+        parts: [{ text: prompt}],
       },
       {
         role: "model",
