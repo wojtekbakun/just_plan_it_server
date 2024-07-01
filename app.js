@@ -40,19 +40,52 @@ app.listen(PORT, () => {
 });
 
 
-const generationConfig = {
-  temperature: 1,
-  topP: 0.95,
-  topK: 64,
-  maxOutputTokens: 8192,
-  responseMimeType: "text/plain",
-};
-
 async function run(whatToPlan, whenToPlan, currentSchedule) {
   // The Gemini 1.5 models are versatile and work with multi-turn conversations (like chat)
-  const prompt = `Jesteś ekspertem odnośnie zarządzania czasem oraz planowania zadań. Twoją specjalnością jest planowanie długoterminowe. Chcę nauczyć się ${whatToPlan} w ciągu ${whenToPlan}, a mój obecny plan to ${currentSchedule}. Rozpisz mi czynności, które mam wykonać lub tematy, które muszę opanować, aby zrealizować cel. Podziel je na drobne zadania, które będę sukcesywnie wykonywać. Skup się na planowaniu długoterminowym i porozkładaj zadania na różne dni. W opisie dodaj link do podanych przez ciebie tematów. Podaj mi odpowiedź w formacie JSON z polami: tytuł, czas rozpoczęcia (data i godzina), czas zakończenia (data i godzina), opis (opis i link bez pola z opisem). Nie formatuj linków i nie dodawaj dodatkowych znaków, ani paragrafów.`;
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash"});
+  const prompt = `Jesteś ekspertem odnośnie zarządzania czasem oraz planowania zadań. Twoją specjalnością jest planowanie długoterminowe. Chcę nauczyć się ${whatToPlan} w ciągu ${whenToPlan}, a mój obecny plan to ${currentSchedule}. Rozpisz mi czynności, które mam wykonać lub tematy, które muszę opanować, aby zrealizować cel. Podziel je na drobne zadania, które będę sukcesywnie wykonywać. Skup się na planowaniu długoterminowym i porozkładaj zadania na różne dni. W description dodaj link do podanych przez ciebie tematów.`;
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  
+const responseSchema ={
+  "type": "object",
+  "properties": {
+    "day-number": {
+      "type": "string"
+    },
+    "event": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "start-date": {
+          "type": "string"
+        },
+        "end-date": {
+          "type": "string"
+        },
+        "link": {
+          "type": "string"
+        },
+      },
+      "required": [
+        "title",
+        "description",
+        "start-date",
+        "end-date",
+        "link"
+      ]
+    }
+  },
+  "required": [
+    "day-number",
+    "event"
+  ]
+}
 
+  
   const chat = model.startChat({
     history: [
       {
@@ -65,7 +98,12 @@ async function run(whatToPlan, whenToPlan, currentSchedule) {
       },
     ],
     generationConfig: {
-      maxOutputTokens: 1000,
+  temperature: 1,
+  topP: 0.95,
+  topK: 64,
+  maxOutputTokens: 3000,
+      responseMimeType: "application/json",
+  responseSchema: responseSchema,
     },
   });
 
