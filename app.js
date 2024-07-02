@@ -30,7 +30,7 @@ app.get('/', (req, res) => {
 
 app.post('/generate', async (req, res) => {
   const data = req.body;
-  const result = await run(data.whatToPlan, data.whenToPlan, data.currentSchedule);
+  const result = await run(data.userInput);
   res.send(result);
 });
 
@@ -40,78 +40,69 @@ app.listen(PORT, () => {
 });
 
 
-async function run(whatToPlan, whenToPlan, currentSchedule) {
-  // The Gemini 1.5 models are versatile and work with multi-turn conversations (like chat)
-  const prompt = `Jesteś ekspertem odnośnie zarządzania czasem oraz planowania zadań. Twoją specjalnością jest planowanie długoterminowe. Chcę nauczyć się ${whatToPlan} w ciągu ${whenToPlan}, a mój obecny plan to ${currentSchedule}. Rozpisz mi czynności, które mam wykonać lub tematy, które muszę opanować, aby zrealizować cel. Podziel je na drobne zadania, które będę sukcesywnie wykonywać. Skup się na planowaniu długoterminowym i porozkładaj zadania na różne dni. W description dodaj link do podanych przez ciebie tematów.`;
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-  
-const responseSchema ={
+async function run(userInput) {
+
+  const responseSchema = 
+  {
   "type": "object",
   "properties": {
-    "day-number": {
+    "event-title": {
       "type": "string"
     },
-    "event": {
-      "type": "object",
-      "properties": {
-        "title": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        },
-        "start-date": {
-          "type": "string"
-        },
-        "end-date": {
-          "type": "string"
-        },
-        "link": {
-          "type": "string"
-        },
-      },
-      "required": [
-        "title",
-        "description",
-        "start-date",
-        "end-date",
-        "link"
-      ]
+    "event-description": {
+      "type": "string"
+    },
+    "start-date": {
+      "type": "string"
+    },
+    "end-date": {
+      "type": "string"
+    },
+    "resource-link": {
+      "type": "string"
     }
   },
   "required": [
-    "day-number",
-    "event"
+    "event-title",
+    "event-description",
+    "start-date",
+    "end-date",
+    "resource-link"
   ]
 }
+  const prompt = `Jesteś ekspertem odnośnie zarządzania czasem oraz planowania zadań.
+  Twoją specjalnością jest planowanie długoterminowe. Podam ci rzecz, którą chcę opanować i czas jaki chcę na to poświęcić,
+  a ty na podstawie mojego planu rozpisz mi czynności, które mam wykonać lub tematy, które muszę opanować,
+  aby zrealizować cel. Podziel je na drobne zadania, które będę sukcesywnie wykonywać.
 
-  
-  const chat = model.startChat({
-    history: [
-      {
-        role: "user",
-        parts: [{ text: prompt}],
-      },
-      {
-        role: "model",
-        parts: [{ text: "Let's plan something!" }],
-      },
-    ],
-    generationConfig: {
-  temperature: 1,
-  topP: 0.95,
-  topK: 64,
-  maxOutputTokens: 3000,
+  Chcę opanować: ${userInput}
+
+  Twoja odpowiedź niech będzie w formacie JSON, zawierającym pola:
+  events:
+  - title: tytuł zadania
+  - description: opis zadania
+  - start-date: data rozpoczęcia zadania
+  - end-date: data zakończenia zadania
+  - resource-link: link do zasobu, który pomoże mi w realizacji zadania
+  `;
+
+  const model = genAI.getGenerativeModel({
+    model: "gemini-1.5-flash", generationConfig: {
+      temperature: 1,
+      topP: 0.95,
+      topK: 64,
+      maxOutputTokens: 3000,
       responseMimeType: "application/json",
-  responseSchema: responseSchema,
+      responseSchema: responseSchema,
     },
-  });
+  } );
+  
+
 
   const msg = prompt;
 
-  const result = await chat.sendMessage(msg);
-  const response = await result.response;
-  const text = response.text();
+  const result = await model.generateContent(prompt);
+  const text = result.response.text();
   console.log(text);
   return text;
 }
