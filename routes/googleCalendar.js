@@ -7,17 +7,17 @@ const calendar = require("../services/googleCalendar");
 
 router.post("/send-event", async (req, res) => {
     const event = req.body.events;
-    const insertPromises = event.map((evencior) => {
-        const singleEvent = {
-            summary: `title:${evencior.title}`,
-            description: evencior.description,
+    const insertPromises = event.map((singleEvent) => {
+        const eventToSend = {
+            summary: singleEvent.title,
+            description: `${singleEvent.description}\n\n Link to resource: ${singleEvent.resourceLink}`,
             start: {
-                dateTime: "2024-07-07T09:00:00-07:00",
-                timeZone: "America/Los_Angeles",
+                dateTime: singleEvent.startDate,
+                timeZone: singleEvent.timeZone,
             },
             end: {
-                dateTime: "2024-07-07T17:00:00-07:00",
-                timeZone: "America/Los_Angeles",
+                dateTime: singleEvent.endDate,
+                timeZone: singleEvent.timeZone,
             },
         };
 
@@ -26,7 +26,7 @@ router.post("/send-event", async (req, res) => {
                 {
                     auth: oauth2Client,
                     calendarId: "primary",
-                    resource: singleEvent,
+                    resource: eventToSend,
                 },
                 function (err, event) {
                     if (err) {
@@ -35,7 +35,7 @@ router.post("/send-event", async (req, res) => {
                         );
                         reject(err);
                     } else {
-                        console.log("Event created");
+                        console.log(`Event created: ${event.data.htmlLink}`);
                         resolve(event);
                     }
                 }
