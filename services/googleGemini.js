@@ -24,13 +24,15 @@ async function generatePlan(userInput) {
 
         Your response should be in JSON format, containing the fields:
 
+        eventName: event title (max 3 words)
         events:
-        •	title: task title
-        •	description: task description
-        •	startDate: task start date and time (YYYY-MM-DDTHH:mm:ssZ)
-        •	endDate: task end date and time (YYYY-MM-DDTHH:mm:ssZ)
-        •	timeZone: task time zone
-        •	resourceLink: link to a resource that will help me complete the task
+            taskNumber: task number
+            title: task title
+            description: task description
+            startDate: task start date and time (YYYY-MM-DDTHH:mm:ssZ)
+            endDate: task end date and time (YYYY-MM-DDTHH:mm:ssZ)
+            timeZone: task time zone
+            resourceLink: link to a resource that will help me complete the task
     `;
 
     const model = genAI.getGenerativeModel({

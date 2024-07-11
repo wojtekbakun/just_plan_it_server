@@ -8,14 +8,15 @@ admin.initializeApp({
 uploadToFirebase = (events) => {
     const db = admin.firestore();
     const obj = JSON.parse(events);
-    sendAllToFirebase(obj.events, 'events', db);
+    const eventName = obj.eventName;
+    sendAllToFirebase('events', obj.events, eventName, db);
 };
 
 
-function sendAllToFirebase(eventToSend, collectionName, db) {
+function sendAllToFirebase(collectionName, eventToSend, eventName, db) {
     const allPromises = eventToSend.map((singleEvent) => {
         return new Promise((resolve, reject) => {
-            sendSingleEventToFirebase(singleEvent, collectionName, db, resolve, reject);
+            sendSingleEventToFirebase(singleEvent, collectionName, eventName, db, resolve, reject);
         });
     });
 
@@ -24,21 +25,24 @@ function sendAllToFirebase(eventToSend, collectionName, db) {
             console.log('All events created');
         })
         .catch((err) => {
-            console.error('An error occurred');
+            console.error('An error occurred: ', err);
         });
 };
 
-function sendSingleEventToFirebase(eventToSend, collectionName, db, resolve, reject) {
-    db.collection(collectionName).add({
+async function sendSingleEventToFirebase(eventToSend, collectionName, eventName, db, resolve, reject) {
+    const docTitle = eventToSend.taskNumber + '. ' + eventToSend.title;
+    const eventDocRef = db.collection(collectionName).doc(eventName).collection('steps').doc(docTitle);
+    await eventDocRef.set({
+        taskNumber: eventToSend.taskNumber,
         title: eventToSend.title,
-        description: eventToSend.description,
+        description: eventToSend.description + '\n\n' + eventName,
         startDate: eventToSend.startDate,
         endDate: eventToSend.endDate,
         timeZone: eventToSend.timeZone,
     })
-        .then(docRef => {
-            resolve(docRef);
-            console.log(`Event dodany z ID: ${docRef.id}`);
+        .then(eventDocRef => {
+            resolve(eventDocRef);
+            console.log(`Dodano event o tytule: ${docTitle}`);
         })
         .catch(error => {
             reject(error);
