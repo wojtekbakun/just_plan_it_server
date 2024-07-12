@@ -2,3 +2,5 @@ credentials.json
 token.json
 .env
 firebase_key.json
+package.json
+package-lock.json
