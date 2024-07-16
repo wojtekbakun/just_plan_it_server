@@ -13,7 +13,18 @@ uploadToFirebase = (events) => {
 };
 
 
-function sendAllToFirebase(collectionName, eventToSend, eventName, db) {
+async function sendAllToFirebase(collectionName, eventToSend, eventName, db) {
+    //first send username
+    const eventsRef = db.collection(collectionName).doc(eventName);
+    await eventsRef.set({
+        username: 'username',
+    }).then(() => {
+        console.log('Username added');
+    }).catch((err) => {
+        console.error('An error occurred: ', err);
+    });
+
+    //then send all events
     const allPromises = eventToSend.map((singleEvent) => {
         return new Promise((resolve, reject) => {
             sendSingleEventToFirebase(singleEvent, collectionName, eventName, db, resolve, reject);
