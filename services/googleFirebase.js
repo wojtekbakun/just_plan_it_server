@@ -39,6 +39,7 @@ async function sendSingleEventToFirebase(eventToSend, collectionName, eventName,
         startDate: eventToSend.startDate,
         endDate: eventToSend.endDate,
         timeZone: eventToSend.timeZone,
+        createdAt: new Date().toISOString(),
     })
         .then(eventDocRef => {
             resolve(eventDocRef);
