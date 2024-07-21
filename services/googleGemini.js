@@ -10,7 +10,7 @@ async function generatePlan(userInput) {
         I will provide you with a skill I want to master and the time I want to dedicate to it.
         Based on my plan, you will outline tasks and topics for me to master.
         Divide them into small tasks that I will complete gradually.
-        Today is 06.07.2024.
+        Today is ${Date.now}.
 
         Focus on:
 
@@ -29,10 +29,11 @@ async function generatePlan(userInput) {
             taskNumber: task number
             title: task title
             description: task description
-            startDate: task start date and time (YYYY-MM-DDTHH:mm:ssZ)
-            endDate: task end date and time (YYYY-MM-DDTHH:mm:ssZ)
+            startDate: task start date and time (ISO format)
+            endDate: task end date and time (ISO format)
             timeZone: task time zone
             resourceLink: link to a resource that will help me complete the task
+            resourceLinkTitle: title of the resource
     `;
 
     const model = genAI.getGenerativeModel({

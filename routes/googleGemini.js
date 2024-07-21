@@ -7,7 +7,7 @@ router.post("/generatePlan", async (req, res) => {
     const data = req.body;
     const generatedPlan = await generatePlan(data.userInput);
     await uploadToFirebase(generatedPlan);
-    res.send("Plan successfully generated and uploaded to Firestore!");
+    res.send({ 'message': 'Plan successfully generated and uploaded to Firestore!' });
 });
 
 module.exports = router;

@@ -1,5 +1,6 @@
 const admin = require('firebase-admin');
 const serviceAccount = require('../firebase_key.json');
+const { resource } = require('../app');
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
@@ -17,7 +18,7 @@ async function sendAllToFirebase(collectionName, eventToSend, eventName, db) {
     //first send username
     const eventsRef = db.collection(collectionName).doc(eventName);
     await eventsRef.set({
-        username: 'username',
+        createdAt: new Date().toISOString(),
     }).then(() => {
         console.log('Username added');
     }).catch((err) => {
@@ -46,7 +47,9 @@ async function sendSingleEventToFirebase(eventToSend, collectionName, eventName,
     await eventDocRef.set({
         taskNumber: eventToSend.taskNumber,
         title: eventToSend.title,
-        description: eventToSend.description + '\n\n' + eventName,
+        description: eventToSend.description,
+        resourceLink: eventToSend.resourceLink,
+        resourceLinkTitle: eventToSend.resourceLinkTitle,
         startDate: eventToSend.startDate,
         endDate: eventToSend.endDate,
         timeZone: eventToSend.timeZone,
@@ -54,11 +57,11 @@ async function sendSingleEventToFirebase(eventToSend, collectionName, eventName,
     })
         .then(eventDocRef => {
             resolve(eventDocRef);
-            console.log(`Dodano event o tytule: ${docTitle}`);
+            console.log(`Added event ${docTitle}`);
         })
         .catch(error => {
             reject(error);
-            console.error(`Wystąpił błąd przy dodawaniu eventu: ${error}`);
+            console.error(`There is an error: ${error}`);
         });
 }
 
