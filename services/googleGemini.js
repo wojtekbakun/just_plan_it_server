@@ -24,7 +24,6 @@ async function generatePlan(userInput) {
 
         Your response should be in JSON format, containing the fields:
 
-        eventName: event title (max 3 words)
         events:
             taskNumber: task number
             title: task title
