@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const generatePlan = require("../services/googleGemini");
-const uploadToFirebase = require("../services/googleFirebase");
+const { uploadToFirebase, getEventsFromFirebase } = require("../services/googleFirebase");
 
 router.post("/generatePlan", async (req, res) => {
     const data = req.body;

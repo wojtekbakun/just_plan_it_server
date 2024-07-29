@@ -4,10 +4,12 @@ const router = express.Router();
 const geminiRoutes = require("./googleGemini");
 const calendarRoutes = require("./googleCalendar");
 const oauth2Routes = require("./oauth2");
+const firebaseRoutes = require("./googleFirebase");
 
 router.use(geminiRoutes);
 router.use(calendarRoutes);
 router.use(oauth2Routes);
+router.use(firebaseRoutes);
 
 router.get("/", (req, res) => {
     res.send("Welcome in Calend.ai!!");

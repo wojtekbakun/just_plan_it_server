@@ -4,13 +4,14 @@ require('dotenv').config();
 async function generatePlan(userInput) {
     // Access your API key as an environment variable 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const currentDateISO = new Date().toISOString();
     const prompt =
         `
         You are an expert in time management and task planning. Your specialty is long-term planning.
         I will provide you with a skill I want to master and the time I want to dedicate to it.
         Based on my plan, you will outline tasks and topics for me to master.
         Divide them into small tasks that I will complete gradually.
-        Today is ${Date.now}.
+        Today is ${currentDateISO}.
 
         Focus on:
 
@@ -24,15 +25,15 @@ async function generatePlan(userInput) {
 
         Your response should be in JSON format, containing the fields:
 
+        eventName: name of the event
         events:
             taskNumber: task number
             title: task title
             description: task description
-            startDate: task start date and time (ISO format)
-            endDate: task end date and time (ISO format)
-            timeZone: task time zone
             resourceLink: link to a resource that will help me complete the task
             resourceLinkTitle: title of the resource
+            startDate: task start date and time in the future (ISO format)
+            endDate: task end date and time in the future (ISO format)
     `;
 
     const model = genAI.getGenerativeModel({
@@ -40,7 +41,7 @@ async function generatePlan(userInput) {
             temperature: 1,
             topP: 0.95,
             topK: 64,
-            maxOutputTokens: 3000,
+            maxOutputTokens: 5000,
             responseMimeType: "application/json",
         },
     });

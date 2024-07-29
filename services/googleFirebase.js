@@ -1,6 +1,5 @@
 const admin = require('firebase-admin');
 const serviceAccount = require('../firebase_key.json');
-const { resource } = require('../app');
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
@@ -10,6 +9,7 @@ uploadToFirebase = (events) => {
     const db = admin.firestore();
     const obj = JSON.parse(events);
     const eventName = obj.eventName;
+    console.log('Event name: ', eventName);
     sendAllToFirebase('events', obj.events, eventName, db);
 };
 
@@ -20,7 +20,7 @@ async function sendAllToFirebase(collectionName, eventToSend, eventName, db) {
     await eventsRef.set({
         createdAt: new Date().toISOString(),
     }).then(() => {
-        console.log('Username added');
+        console.log('CreatedAt filed added');
     }).catch((err) => {
         console.error('An error occurred: ', err);
     });
@@ -52,12 +52,11 @@ async function sendSingleEventToFirebase(eventToSend, collectionName, eventName,
         resourceLinkTitle: eventToSend.resourceLinkTitle,
         startDate: eventToSend.startDate,
         endDate: eventToSend.endDate,
-        timeZone: eventToSend.timeZone,
         createdAt: new Date().toISOString(),
     })
         .then(eventDocRef => {
             resolve(eventDocRef);
-            console.log(`Added event ${docTitle}`);
+            console.log(`Step ${docTitle}`);
         })
         .catch(error => {
             reject(error);
@@ -65,4 +64,27 @@ async function sendSingleEventToFirebase(eventToSend, collectionName, eventName,
         });
 }
 
-module.exports = uploadToFirebase; 
+async function getEventsFromFirebase(startDate) {
+    const db = admin.firestore();
+    const eventsRef = db.collection('events/' + 'Mastering Babka Baking' + '/steps');
+    const snapshot = await eventsRef.get();
+    const eventsOfTheDay = [];
+
+    const start = new Date(startDate);
+    const dayToCheck = start.getUTCDate();
+
+    try {
+        snapshot.forEach(doc => {
+            const docStartDate = new Date(doc.data().startDate).getUTCDate();
+            if (docStartDate === dayToCheck) {
+                eventsOfTheDay.push(doc.data());
+            }
+        });
+    }
+    catch (error) {
+        console.error('Error getting documents', error);
+    }
+    return eventsOfTheDay;
+}
+
+module.exports = { uploadToFirebase, getEventsFromFirebase }; 
