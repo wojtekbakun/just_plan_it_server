@@ -1,6 +1,8 @@
 const admin = require('firebase-admin');
 const serviceAccount = require('../firebase_key.json');
 
+const userId = 'user123';
+
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
 });
@@ -15,17 +17,9 @@ uploadToFirebase = (events) => {
 
 
 async function sendAllToFirebase(collectionName, eventToSend, eventName, db) {
-    //first send username
-    const eventsRef = db.collection(collectionName).doc(eventName);
-    await eventsRef.set({
-        createdAt: new Date().toISOString(),
-    }).then(() => {
-        console.log('CreatedAt filed added');
-    }).catch((err) => {
-        console.error('An error occurred: ', err);
-    });
 
-    //then send all events
+    const eventsRef = db.collection('users').doc(userId).collection('plans');
+
     const allPromises = eventToSend.map((singleEvent) => {
         return new Promise((resolve, reject) => {
             sendSingleEventToFirebase(singleEvent, collectionName, eventName, db, resolve, reject);
@@ -43,15 +37,17 @@ async function sendAllToFirebase(collectionName, eventToSend, eventName, db) {
 
 async function sendSingleEventToFirebase(eventToSend, collectionName, eventName, db, resolve, reject) {
     const docTitle = eventToSend.taskNumber + '. ' + eventToSend.title;
-    const eventDocRef = db.collection(collectionName).doc(eventName).collection('steps').doc(docTitle);
+    const eventDocRef = db.collection('users').doc(userId).collection('plans').doc(eventName);
     await eventDocRef.set({
-        taskNumber: eventToSend.taskNumber,
-        title: eventToSend.title,
-        description: eventToSend.description,
-        resourceLink: eventToSend.resourceLink,
-        resourceLinkTitle: eventToSend.resourceLinkTitle,
-        startDate: eventToSend.startDate,
-        endDate: eventToSend.endDate,
+        steps: {
+            title: eventToSend.title,
+            taskNumber: eventToSend.taskNumber,
+            description: eventToSend.description,
+            resourceLink: eventToSend.resourceLink,
+            resourceLinkTitle: eventToSend.resourceLinkTitle,
+            startDate: eventToSend.startDate,
+            endDate: eventToSend.endDate,
+        },
         createdAt: new Date().toISOString(),
     })
         .then(eventDocRef => {

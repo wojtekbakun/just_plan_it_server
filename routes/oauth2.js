@@ -6,7 +6,7 @@ const oauth2Client = require("../configs/oauth2");
 // generate a url that asks permissions for Google Calendar scope
 const scopes = ["https://www.googleapis.com/auth/calendar.events"];
 
-router.get("/google", async (req, res) => {
+router.get("/googleOA2", async (req, res) => {
     if (req.session.tokens) {
         oauth2Client.setCredentials(req.session.tokens);
         res.send({ msg: "You are already connected to Google Calendar" });
