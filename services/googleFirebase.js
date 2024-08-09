@@ -9,57 +9,26 @@ admin.initializeApp({
 const db = admin.firestore();
 db.settings({ ignoreUndefinedProperties: true });
 
-uploadToFirebase = (events) => {
+uploadToFirebase = async (userId, events) => {
     const obj = JSON.parse(events);
     const eventName = obj.eventName;
     console.log('Event name: ', eventName);
-    sendAllToFirebase('events', obj.events, eventName, db);
+    console.log('events:', obj.events);
+    sendPlanToFirebase(userId, obj.events, eventName, db);
 };
 
 
-async function sendAllToFirebase(collectionName, eventToSend, eventName) {
-
+async function sendPlanToFirebase(userId, events, eventName, db) {
     const eventsRef = db.collection('users').doc(userId).collection('plans');
 
-    const allPromises = eventToSend.map((singleEvent) => {
-        return new Promise((resolve, reject) => {
-            sendSingleEventToFirebase(singleEvent, collectionName, eventName, db, resolve, reject);
-        });
-    });
-
-    Promise.all(allPromises)
-        .then(() => {
-            console.log('All events created');
-        })
-        .catch((err) => {
-            console.error('An error occurred: ', err);
-        });
+    try {
+        await eventsRef.doc(eventName).set({ events: events });
+        console.log('Plan successfully uploaded to Firestore!');
+    } catch (err) {
+        console.error('There is an error:', err);
+    }
 };
 
-async function sendSingleEventToFirebase(eventToSend, collectionName, eventName, resolve, reject) {
-    const docTitle = eventToSend.taskNumber + '. ' + eventToSend.title;
-    const eventDocRef = db.collection('users').doc(userId).collection('plans').doc(eventName);
-    await eventDocRef.set({
-        steps: {
-            title: eventToSend.title,
-            taskNumber: eventToSend.taskNumber,
-            description: eventToSend.description,
-            resourceLink: eventToSend.resourceLink,
-            resourceLinkTitle: eventToSend.resourceLinkTitle,
-            startDate: eventToSend.startDate,
-            endDate: eventToSend.endDate,
-        },
-        createdAt: new Date().toISOString(),
-    })
-        .then(eventDocRef => {
-            resolve(eventDocRef);
-            console.log(`Step ${docTitle}`);
-        })
-        .catch(error => {
-            reject(error);
-            console.error(`There is an error: ${error}`);
-        });
-}
 
 async function getEventsFromFirebase(startDate) {
     const eventsRef = db.collection('events/' + 'Mastering Babka Baking' + '/steps');
@@ -83,4 +52,14 @@ async function getEventsFromFirebase(startDate) {
     return eventsOfTheDay;
 }
 
-module.exports = { uploadToFirebase, getEventsFromFirebase, db }; 
+async function getUserEmail(userId) {
+    const userRef = db.collection('users/').doc(userId);
+    const user = await userRef.get();
+
+    if (!user.exists) {
+        throw new Error('User not found');
+    }
+    return user.data().email;
+}
+
+module.exports = { uploadToFirebase, getEventsFromFirebase, db, admin, getUserEmail }; 
