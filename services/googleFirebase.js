@@ -1,14 +1,15 @@
 const admin = require('firebase-admin');
 const serviceAccount = require('../firebase_key.json');
 
-const userId = 'user123';
-
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
+    databaseURL: "https://justplanit-ebff7-default-rtdb.europe-west1.firebasedatabase.app"
 });
 
+const db = admin.firestore();
+db.settings({ ignoreUndefinedProperties: true });
+
 uploadToFirebase = (events) => {
-    const db = admin.firestore();
     const obj = JSON.parse(events);
     const eventName = obj.eventName;
     console.log('Event name: ', eventName);
@@ -16,7 +17,7 @@ uploadToFirebase = (events) => {
 };
 
 
-async function sendAllToFirebase(collectionName, eventToSend, eventName, db) {
+async function sendAllToFirebase(collectionName, eventToSend, eventName) {
 
     const eventsRef = db.collection('users').doc(userId).collection('plans');
 
@@ -35,7 +36,7 @@ async function sendAllToFirebase(collectionName, eventToSend, eventName, db) {
         });
 };
 
-async function sendSingleEventToFirebase(eventToSend, collectionName, eventName, db, resolve, reject) {
+async function sendSingleEventToFirebase(eventToSend, collectionName, eventName, resolve, reject) {
     const docTitle = eventToSend.taskNumber + '. ' + eventToSend.title;
     const eventDocRef = db.collection('users').doc(userId).collection('plans').doc(eventName);
     await eventDocRef.set({
@@ -61,7 +62,6 @@ async function sendSingleEventToFirebase(eventToSend, collectionName, eventName,
 }
 
 async function getEventsFromFirebase(startDate) {
-    const db = admin.firestore();
     const eventsRef = db.collection('events/' + 'Mastering Babka Baking' + '/steps');
     const snapshot = await eventsRef.get();
     const eventsOfTheDay = [];
@@ -83,4 +83,4 @@ async function getEventsFromFirebase(startDate) {
     return eventsOfTheDay;
 }
 
-module.exports = { uploadToFirebase, getEventsFromFirebase }; 
+module.exports = { uploadToFirebase, getEventsFromFirebase, db }; 

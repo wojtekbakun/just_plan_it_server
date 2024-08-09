@@ -1,15 +1,17 @@
 const admin = require('firebase-admin');
 
-const userId = 'user123';
-async function addUser(name, email, password) {
+async function addUser(name, email, userId) {
 
     const db = admin.firestore();
     const userRef = db.collection('users').doc(userId);
+    const timestamp = Date.now();
+    const isoDate = new Date(timestamp).toISOString();
 
     await userRef.set({
         name: name,
         email: email,
-        password: password,
+        googleId: userId,
+        accountCreatedAt: isoDate
     })
         .then(() => {
             console.log('User added');
