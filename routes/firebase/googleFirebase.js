@@ -17,19 +17,15 @@ router.get("/plans", ensureAuthenticated, async (req, res) => {
 
 router.get("/plans/:planId", ensureAuthenticated, async (req, res) => {
     const googleId = req.user.googleId;
-    //const { planId } = req.params;
-    const planId = 'Mastering Apple Pie Baking';
+    const { planId } = req.params;
 
-    console.log('googleId:', googleId);
-    console.log('planId:', planId);
-
-    getEventsFromFirebase(googleId, planId)
-    // .then((events) => {
-    //     res.send(events);
-    // })
-    // .catch((err) => {
-    //     res.status(500).send("An error occurred: " + err);
-    // });
+    await getEventsFromFirebase(googleId, planId)
+        .then((events) => {
+            res.json(events);
+        })
+        .catch((err) => {
+            res.status(500).send("An error occurred: " + err);
+        });
 });
 
 module.exports = router;

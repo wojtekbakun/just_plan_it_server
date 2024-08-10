@@ -15,7 +15,7 @@ async function sendPlanToFirebase(userId, events, eventName) {
 
 async function getEventsFromFirebase(userId, planId) {
     const eventsRef = getRef({ userId: userId, planId: planId })
-    await eventsRef.get().then((doc) => {
+    return eventsRef.get().then((doc) => {
         if (doc.exists) {
             // Document data will be available here
             const events = doc.data().events;
