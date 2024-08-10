@@ -2,7 +2,7 @@
 const express = require("express");
 const router = express.Router();
 
-const oauth2Client = require("../configs/oauth2");
+const oauth2Client = require("../../configs/oauth2");
 const calendar = require("../services/googleCalendar");
 
 

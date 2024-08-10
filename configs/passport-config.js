@@ -1,7 +1,7 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const BearerStrategy = require('passport-http-bearer').Strategy;
-const { db } = require('../services/googleFirebase');
+const { getRef } = require('../services/firebase/reference');
 
 // Konfiguracja strategii Google
 passport.use(new GoogleStrategy({
@@ -12,7 +12,7 @@ passport.use(new GoogleStrategy({
     async function (accessToken, refreshToken, profile, done) {
         try {
             // Sprawdź, czy użytkownik już istnieje w Firestore
-            const usersRef = db.collection('users');
+            const usersRef = getRef();
             const snapshot = await usersRef.where('googleId', '==', profile.id).get();
 
             let user;
@@ -43,7 +43,7 @@ passport.use(new BearerStrategy(
     async (token, done) => {
         try {
             // Wykonaj zapytanie do Firestore, aby znaleźć użytkownika z danym tokenem
-            const usersRef = db.collection('users');
+            const usersRef = getRef();
             const snapshot = await usersRef.where('token', '==', token).limit(1).get();
 
             if (snapshot.empty) {
@@ -69,7 +69,7 @@ passport.serializeUser((user, done) => {
 // Deserializacja użytkownika z sesji
 passport.deserializeUser(async (id, done) => {
     try {
-        const usersRef = db.collection('users');
+        const usersRef = getRef();
         const snapshot = await usersRef.where('googleId', '==', id).get();
 
         let user;

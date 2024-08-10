@@ -1,12 +1,12 @@
 const express = require("express");
 const router = express.Router();
 
-const geminiRoutes = require("./googleGemini");
+const geminiRoutes = require("./gemini/googleGemini");
 //const calendarRoutes = require("./googleCalendar");
 //const oauth2Routes = require("./oauth2");
-const firebaseRoutes = require("./googleFirebase");
+const firebaseRoutes = require("./firebase/googleFirebase");
 const userRoutes = require("./user");
-const authRoutes = require("./auth");
+const authRoutes = require("./auth/auth");
 const profileRoutes = require("./profile");
 
 router.use(geminiRoutes);

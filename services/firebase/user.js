@@ -1,4 +1,4 @@
-const { db, admin } = require('../services/googleFirebase');
+const { db } = require('../../configs/firebase');
 
 async function addUser(name, email, userId) {
     const userRef = db.collection('users').doc(userId);

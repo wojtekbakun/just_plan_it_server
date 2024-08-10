@@ -28,4 +28,4 @@ const ensureAuthenticated = (req, res, next) => {
     })(req, res, next);
 };
 
-module.exports = ensureAuthenticated;
+module.exports = { ensureAuthenticated };

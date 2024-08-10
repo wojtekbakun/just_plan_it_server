@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const generatePlan = require("../services/googleGemini");
-const { uploadToFirebase, getEventsFromFirebase } = require("../services/googleFirebase");
-const ensureAuthenticated = require("../middleware/auth");
+const generatePlan = require("../../services/gemini/googleGemini");
+const { ensureAuthenticated } = require("../../middleware/auth");
+const { uploadToFirebase } = require("../../services/firebase/uploadEvent");
 
 router.post("/generatePlan", ensureAuthenticated, async (req, res) => {
     const userId = req.user.googleId;
