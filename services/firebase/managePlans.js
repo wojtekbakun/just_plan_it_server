@@ -1,4 +1,3 @@
-const { db } = require('../../configs/firebase');
 const { getRef } = require('./reference');
 
 
@@ -14,26 +13,21 @@ async function sendPlanToFirebase(userId, events, eventName) {
 };
 
 
-async function getEventsFromFirebase(startDate) {
-    const eventsRef = db.collection('events/' + 'Mastering Babka Baking' + '/steps');
-    const snapshot = await eventsRef.get();
-    const eventsOfTheDay = [];
-
-    const start = new Date(startDate);
-    const dayToCheck = start.getUTCDate();
-
-    try {
-        snapshot.forEach(doc => {
-            const docStartDate = new Date(doc.data().startDate).getUTCDate();
-            if (docStartDate === dayToCheck) {
-                eventsOfTheDay.push(doc.data());
-            }
+async function getEventsFromFirebase(userId, planId) {
+    const eventsRef = getRef({ userId: userId, planId: planId })
+    await eventsRef.get().then((doc) => {
+        if (doc.exists) {
+            // Document data will be available here
+            const events = doc.data().events;
+            return events;
+        } else {
+            // The document does not exist
+            console.log('No such document!');
+        }
+    })
+        .catch((error) => {
+            console.error('Error getting document:', error);
         });
-    }
-    catch (error) {
-        console.error('Error getting documents', error);
-    }
-    return eventsOfTheDay;
 }
 
-module.exports = { sendPlanToFirebase };
+module.exports = { sendPlanToFirebase, getEventsFromFirebase };

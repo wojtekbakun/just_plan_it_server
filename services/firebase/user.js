@@ -1,7 +1,7 @@
-const { db } = require('../../configs/firebase');
+const { getRef } = require('./reference');
 
 async function addUser(name, email, userId) {
-    const userRef = db.collection('users').doc(userId);
+    const userRef = getRef({ userId: userId });
     const timestamp = Date.now();
     const isoDate = new Date(timestamp).toISOString();
 
