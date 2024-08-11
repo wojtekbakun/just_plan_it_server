@@ -2,10 +2,13 @@ const { getRef } = require('./reference');
 
 
 async function sendPlanToFirebase(userId, events, eventName) {
-    const eventsRef = getRef(userId);
-
+    console.log('userId:', userId);
+    const eventsRef = getRef({ userId: userId });
+    currentDateISO = new Date().toISOString();
     try {
-        await eventsRef.doc(eventName).set({ events: events });
+        await eventsRef.doc().set({
+            eventName: eventName, events: events, createdAt: currentDateISO
+        });
         console.log('Plan successfully uploaded to Firestore!');
     } catch (err) {
         console.error('There is an error:', err);
