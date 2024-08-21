@@ -3,7 +3,6 @@ const { getRef } = require('./reference');
 
 
 async function sendPlanToFirebase(userId, events, eventName) {
-    console.log('userId:', userId);
     const eventsRef = getRef({ userId: userId });
     currentDateISO = new Date().toISOString();
     try {
