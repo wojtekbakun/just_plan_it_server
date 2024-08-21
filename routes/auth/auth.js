@@ -7,7 +7,7 @@ const router = express.Router();
 router.get('/auth/google',
     passport.authenticate('google', { scope: ['profile', 'email'] }),
     (req, res) =>
-        res.send('Logged in with Google')
+        res.status(200).send('Logged in with Google')
 );
 
 // Callback route po zalogowaniu przez Google
@@ -15,20 +15,20 @@ router.get('/auth/google/callback',
     passport.authenticate('google', { failureRedirect: '/', successRedirect: '/profile' }),
     (req, res) => {
         // Użytkownik zalogowany, można przekierować gdzieś dalej
-        res.redirect('/profile');
+        res.status(200).redirect('/profile');
     }
 );
 
 // Route to authenticate using Bearer token
 router.get('/auth/bearer', passport.authenticate('bearer', { session: false }), (req, res) => {
     // If authentication is successful, the user information will be available in req.user
-    res.json({ message: 'Authenticated', user: req.user });
+    res.status(200).json({ message: 'Authenticated', user: req.user });
 });
 
 // Route do wylogowania
 router.get('/logout', (req, res) => {
     req.logout(() => {
-        res.redirect('/');
+        res.status(200).redirect('/');
     });
 });
 

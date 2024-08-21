@@ -7,6 +7,7 @@ function getRef({ userId, planId } = {}) {
         if (planId !== undefined) {
             return db.collection('users').doc(userId).collection('plans').doc(planId);
         }
+        console.log('plan id is undefined, returning collection');
         return db.collection('users').doc(userId).collection('plans');
     }
     return db.collection('users');

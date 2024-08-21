@@ -1,3 +1,4 @@
+const { response } = require('express');
 const { getRef } = require('./reference');
 
 
@@ -18,14 +19,16 @@ async function sendPlanToFirebase(userId, events, eventName) {
 
 async function getEventsFromFirebase(userId, planId) {
     const eventsRef = getRef({ userId: userId, planId: planId })
+
+
     return eventsRef.get().then((doc) => {
         if (doc.exists) {
             // Document data will be available here
             const events = doc.data().events;
-            return events;
+            return { events: events, status: 200 };
         } else {
             // The document does not exist
-            console.log('No such document!');
+            return { events: null, status: 404 };
         }
     })
         .catch((error) => {
@@ -33,4 +36,19 @@ async function getEventsFromFirebase(userId, planId) {
         });
 }
 
-module.exports = { sendPlanToFirebase, getEventsFromFirebase };
+async function getAllEventsForUser(userId) {
+    const eventsRef = getRef({ userId: userId });
+    return eventsRef.get().then((querySnapshot) => {
+        const events = [];
+        querySnapshot.forEach((doc) => {
+            events.push(doc.data());
+        });
+        return { events: events, status: 200 };
+    })
+        .catch((error) => {
+            console.error('Error getting documents:', error);
+        });
+
+}
+
+module.exports = { sendPlanToFirebase, getEventsFromFirebase, getAllEventsForUser };
